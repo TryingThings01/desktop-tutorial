@@ -5,9 +5,9 @@ highest_diff=0
 highest_log=""
 highest_host=""
 
-for dir in /apps/continuity/nft/*/; do
-    for logfile_head in "$dir"/engine*/log/Start_head*.log; do
-        for logfile_tail in "$dir"/engine*/log/Start_tail*.log; do
+for dir in /logpath/*/; do
+    for logfile_head in "$dir"/logpath/Start_head*.log; do
+        for logfile_tail in "$dir"/logpath/Start_tail*.log; do
             if [ -e "$logfile_tail" ] && [ "$(basename "$logfile_head")" == "$(basename "$logfile_tail" | sed 's/Start_tail/Start_head/')" ]; then
                 head_date=$(head -n 1 "$logfile_head" | awk '{print $2,$3}')
                 tail_date=$(tail -n 1 "$logfile_tail" | awk '{print $2,$3}')
