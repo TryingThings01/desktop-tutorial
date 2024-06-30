@@ -3,10 +3,11 @@
 # Get current date in YYYY-MM-DD format
 current_date=$(date +%Y-%m-%d)
 
-# Declare an associative array to store the maximum time difference per directory
+# Declare associative arrays to store the maximum time difference per directory
 declare -A max_time_diff
+declare -A max_logfile
 
-for logfile in /"path of log"; do
+for logfile in "log path"/*.log; do
     # Check if the file was modified today
     if [[ $(date -r "$logfile" +%Y-%m-%d) == "$current_date" ]]; then
         head_date=$(head -n 1 "$logfile" | awk '{print $2, $3}')
@@ -19,18 +20,18 @@ for logfile in /"path of log"; do
         dir_name=$(dirname "$logfile")
 
         # Update max_time_diff if current time_diff is greater
-        if [[ -z ${max_time_diff[$dir_name]} || $time_diff -gt ${max_time_diff[$dir_name]} ]]; then
-            max_time_diff[$dir_name]=$time_diff
-            max_logfile[$dir_name]=$logfile
+        if [[ -z ${max_time_diff["$dir_name"]} || $time_diff -gt ${max_time_diff["$dir_name"]} ]]; then
+            max_time_diff["$dir_name"]=$time_diff
+            max_logfile["$dir_name"]=$logfile
         fi
     fi
 done
 
 # Iterate over the directories and print results
 for dir in "${!max_time_diff[@]}"; do
-    logfile=${max_logfile[$dir]}
-    hours=$((max_time_diff[$dir] / 3600))
-    minutes=$((max_time_diff[$dir] % 3600 / 60))
-    seconds=$((max_time_diff[$dir] % 60))
+    logfile=${max_logfile["$dir"]}
+    hours=$((max_time_diff["$dir"] / 3600))
+    minutes=$((max_time_diff["$dir"] % 3600 / 60))
+    seconds=$((max_time_diff["$dir"] % 60))
     echo "Host: $(hostname) - The time difference for $logfile = $(printf "%02d:%02d:%02d" $hours $minutes $seconds) on $(date -r "$logfile" +%d/%m/%Y)"
 done
