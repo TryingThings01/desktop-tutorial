@@ -6,7 +6,7 @@ current_date=$(date +%Y-%m-%d)
 # Declare an associative array to store the maximum time difference per directory
 declare -A max_time_diff
 
-for logfile in /apps/fof/nft/*/log/FOFT_*.log; do
+for logfile in /"path of log"; do
     # Check if the file was modified today
     if [[ $(date -r "$logfile" +%Y-%m-%d) == "$current_date" ]]; then
         head_date=$(head -n 1 "$logfile" | awk '{print $2, $3}')
