@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Get current date in YYYY-MM-DD format
+current_date=$(date +%Y-%m-%d)
+
+# Declare an associative array to store the maximum time difference per directory
+declare -A max_time_diff
+
+for logfile in /apps/fof/nft/*/log/FOFT_*.log; do
+    # Check if the file was modified today
+    if [[ $(date -r "$logfile" +%Y-%m-%d) == "$current_date" ]]; then
+        head_date=$(head -n 1 "$logfile" | awk '{print $2, $3}')
+        tail_date=$(tail -n 1 "$logfile" | awk '{print $2, $3}')
+        head_timestamp=$(date -d "$head_date" +%s)
+        tail_timestamp=$(date -d "$tail_date" +%s)
+        time_diff=$((tail_timestamp - head_timestamp))
+
+        # Get the directory name from the logfile path
+        dir_name=$(dirname "$logfile")
+
+        # Update max_time_diff if current time_diff is greater
+        if [[ -z ${max_time_diff[$dir_name]} || $time_diff -gt ${max_time_diff[$dir_name]} ]]; then
+            max_time_diff[$dir_name]=$time_diff
+            max_logfile[$dir_name]=$logfile
+        fi
+    fi
+done
+
+# Iterate over the directories and print results
+for dir in "${!max_time_diff[@]}"; do
+    logfile=${max_logfile[$dir]}
+    hours=$((max_time_diff[$dir] / 3600))
+    minutes=$((max_time_diff[$dir] % 3600 / 60))
+    seconds=$((max_time_diff[$dir] % 60))
+    echo "Host: $(hostname) - The time difference for $logfile = $(printf "%02d:%02d:%02d" $hours $minutes $seconds) on $(date -r "$logfile" +%d/%m/%Y)"
+done
