@@ -1,15 +1,25 @@
 #!/bin/bash
 
-# Get current date in YYYY-MM-DD format
-current_date=$(date +%Y-%m-%d)
+# Check if a date is provided as an argument
+if [ -n "$1" ]; then
+    user_date=$1
+else
+    user_date=$(date +%Y-%m-%d)
+fi
+
+# Validate the date format
+if ! date -d "$user_date" &>/dev/null; then
+    echo "Invalid date format. Please provide a date in YYYY-MM-DD format."
+    exit 1
+fi
 
 # Declare associative arrays to store the maximum time difference per directory
 declare -A max_time_diff
 declare -A max_logfile
 
-for logfile in "log path"/*.log; do
-    # Check if the file was modified today
-    if [[ $(date -r "$logfile" +%Y-%m-%d) == "$current_date" ]]; then
+for logfile in /apps/fof/nft/*/log/FOFT_*.log; do
+    # Check if the file was modified on the provided date
+    if [[ $(date -r "$logfile" +%Y-%m-%d) == "$user_date" ]]; then
         head_date=$(head -n 1 "$logfile" | awk '{print $2, $3}')
         tail_date=$(tail -n 1 "$logfile" | awk '{print $2, $3}')
         head_timestamp=$(date -d "$head_date" +%s)
